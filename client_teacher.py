@@ -38,6 +38,11 @@ class Window(QMainWindow, form_class):
         self.q_list.resize(900, 450)
         self.q_upload.resize(900, 50)
         self.q_upload.returnPressed.connect(self.append_question)
+        self.rcv = Receive()
+        self.rcv.chat.connect(self.recv_chat)
+        self.rcv.chat2.connect(self.recv_chat2)
+        self.rcv.start()
+
 
         # 학생정보열람창 설정
         # self.s_info_browser
@@ -62,9 +67,10 @@ class Window(QMainWindow, form_class):
         self.chat_input.returnPressed.connect(self.send_chat)
         self.chat_window.resize(900, 450)
         self.chat_input.resize(900, 50)
-        self.rcv = Receive()
-        self.rcv.chat.connect(self.recv_chat)
-        self.rcv.start()
+        # self.rcv = Receive()
+        # self.rcv.chat.connect(self.recv_chat)
+        #
+        # self.rcv.start()
 
 
     def move_start_page(self):
@@ -132,9 +138,15 @@ class Window(QMainWindow, form_class):
         print("메세지 수신", msg)
         self.chat_window.append(msg)
 
+    @pyqtSlot(str)
+    def recv_chat2(self, msg):
+        print("메세지 수신", msg)
+        self.q_list.addItem(msg)
+
 
 class Receive(QThread):
     chat = pyqtSignal(str)
+    chat2 = pyqtSignal(str)
     print("큐쓰레드 수신")
 
     def run(self):
@@ -143,6 +155,7 @@ class Receive(QThread):
             data = msg.decode()
             print("큐쓰레드 메시지 수신됨 ", data)
             self.chat.emit(f"학생 : {data}")
+            self.chat2.emit(data)
         self.sock.close()
 
 

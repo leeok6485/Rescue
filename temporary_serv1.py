@@ -1,4 +1,5 @@
 import sqlite3
+import time
 from socket import *
 from threading import *
 
@@ -7,6 +8,8 @@ from threading import *
 #                              db='education', charset='utf8')
 connection = sqlite3.connect("edu.db", check_same_thread = False)
 cur = connection.cursor()
+cur.execute("select * from english")
+questions = cur.fetchall()
 
 class Serv:
     def __init__(self):
@@ -20,6 +23,8 @@ class Serv:
         self.sock.listen(5)
         print(" 접 속 자 대 기 중 . . . ")
         self.accept()
+
+
 
 # 클라 연결 요청
     def accept(self):
@@ -37,19 +42,32 @@ class Serv:
     def recv_msg(self, c_sock):
         while True:
             try:
-                data = c_sock.recv(1024)
-                print(f"받은 메세지 : {data.decode()}")
-                if not data:
+                msg = c_sock.recv(1024).decode()
+                cur.execute("select id from students")
+                result = cur.fetchall()
+                if not msg:
                     break
+                if "@문제" in msg:
+                    print("문제 들어옴")
+                    for i in questions:
+                        print(f"문제 출력하기: {i}")
+                        time.sleep(1/100)
+                        c_sock.send(str(i[1:]).encode())
+                for msgs in result:
+                    if msg in msgs:
+                        print("존재 하는 ID 입니다")
+                        break
+                    else:
+                        print("존재 하지 않는 ID 입니다")
             except:
                 continue
             else:
-                final_msg = data.decode()
+                final_msg = msg
                 print(final_msg)
                 self.send_all_clients(c_sock,final_msg)
         c_sock.close()
 
-    def send_all_clients(self, c_sock,final_msg):
+    def send_all_clients(self, c_sock, final_msg):
         for client in self.clients:
             socket = client
             if socket is not c_sock:
@@ -57,7 +75,6 @@ class Serv:
                     socket.send(final_msg.encode())
                 except:
                     self.clients.remove(client)
-
 
 
 if __name__ == "__main__":
