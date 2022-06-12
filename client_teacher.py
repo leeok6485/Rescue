@@ -37,12 +37,11 @@ class Window(QMainWindow, form_class):
         # 입력칸을 만들어서 문제를 입력할까?
         self.q_list.resize(900, 450)
         self.q_upload.resize(900, 50)
-        self.q_upload.returnPressed.connect(self.append_question1)
+        self.q_upload.returnPressed.connect(self.append_question)
 
         # 학생정보열람창 설정
         # self.s_info_browser
         # 학생의 이름을 입력 했을 때 DB내의 그 학생의 값을 전부 출력할 부분
-        # self.s_info_inputname
         # 학생이름을 그냥 입력 받을곳
         self.s_info_browser.resize(900, 450)
         self.s_info_inputname.resize(900, 50)
@@ -83,13 +82,15 @@ class Window(QMainWindow, form_class):
     def move_chat_page(self):
         self.stackedWidget.setCurrentWidget(self.chat_page)
 
-    # 서버에게 #을 붙여서 메시지 전송하면 서버가 문제출제인걸로 인식
-    def append_question1(self):
+    # 서버에게 특수문자+문제 를 붙여서 메시지 전송하면 서버가 문제출제 저장요청으로 인식
+    def append_question(self):
         question = "@문제 "+self.q_upload.text()
         sock.send(question.encode())
         print("문제 보냄 : ", question)
         self.q_upload.clear()
 
+
+    # 서버에게 특수문자+학생이름 을 붙여서 메시지 전송하면 서버가 학생정보 요청으로 인식
     def info_check(self):
         s_name = "@학생이름 "+self.s_info_inputname.text()
         sock.send(s_name.encode())
@@ -117,7 +118,7 @@ class Window(QMainWindow, form_class):
 
     def cellchanged_event(self, row, col):
         qna_change = self.qna_list.item(row, col)
-        print("변경 : ", qna_change)
+        print(f"{row}열 {col}행 변경 : ", qna_change)
 
     # 체팅은 그냥 클라이언트끼리니 서버는 구분없이 그냥 사이 중계만 하면 될 듯
     def send_chat(self):
