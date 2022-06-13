@@ -1,6 +1,5 @@
 import sys
 import random
-# import pymysql
 import sqlite3
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
